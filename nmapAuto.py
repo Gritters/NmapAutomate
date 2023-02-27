@@ -12,14 +12,21 @@ import nmap
 
 #Create our output file
 
-Port = "443"
-IP = "127.0.0.1"
+#Get args for our scan
+parser = argparse.ArgumentParser()
 
+#Add args
+parser.add_argument('--ip', type=str, required=True, help='The IP Address you would like to scan with NMAP')
+parser.add_argument('--port', type=str, required=True, help='The Port you would like to scan for the IP you have provided')
+#Parse args
+args = parser.parse_args()
+
+#Create nmap scan
 scanner = nmap.PortScanner()
 
-scanResults = scanner.scan(IP, Port)
+scanResults = scanner.scan(args.ip, args.port)
 
-f = open("TestNmapFile.txt", "w")
+f = open("TestNmapFile.txt", "a")
 for i in scanResults:
-    f.write(str(scanResults))
+    f.write(str(i) + "\n")
 f.close()
