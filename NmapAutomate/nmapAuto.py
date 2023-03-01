@@ -2,6 +2,9 @@
 import argparse
 import nmap
 
+#Little project to practice automating NMAP scans utilizing python.
+#Going to start with a single IP and eventually have it read from a list of IPs
+
 # TO DO
 # Read from file - DONE. I think I've done this really shittly and need to figure out how to logic the var type better but it works.
 # Custom NMAP scan to match external engagements
@@ -12,11 +15,6 @@ import nmap
 #Needed packages python-nmap, argparse
 #pip install python-nmap argparse
 
-
-#Little project to practice automating NMAP scans utilizing python.
-#Going to start with a single IP and eventually have it read from a list of IPs
-
-
 def nmapScan(ip, port):
     #NMAP SCAN HERE
     if type(ip) is list:
@@ -24,11 +22,25 @@ def nmapScan(ip, port):
             scanResult = scanner.scan(i, port)
             f = open("TestNmapFile.txt", "a")
             f.write(str(scanResult))
+            for host in scanner.all_hosts():
+                print('----------------------')
+                print(f'Host: {host} {scanner[host].hostname()}')
+                print(f'State: {scanner[host].state()}')
+                for protocol in scanner[host].all_protocols():
+                    print('----------------------')
+                    print(f'Protocol: {protocol}')
+                    #Can't quite figure out how to loop through this correctly. Need to read more about accessing contents of dicts.
+                    """ localPort = scanner[host][protocol].keys()    
+                    #localPort.sort()
+                    for port in localPort():
+                        print(f'port: {port} {scanner[host][protocol][port][state']}') """
     else:
-        scanResults = scanner.scan(ip,port)
+        scanResult = scanner.scan(ip, port)
         f = open("TestNmapFile.txt", "a")
         f.write(str(scanResult))
-    return print("Scan completed. Check file for scan results")
+    
+    print("Scan completed. Check file for scan results")
+    return scanResult
 
 def getIP(ipAddressFile):
     #Get IP as a single IP or out of list
@@ -36,6 +48,16 @@ def getIP(ipAddressFile):
     ipList = file.read().split('\n')
     print(str(ipList))
     return ipList
+
+""" def printResults(scan):
+    #DO THE PRINTING HERE
+    print(str(scan.all_hosts()))
+    for key, value in scan.items():
+        #Print Scan Information
+        print(f" \n VALUE IS: \n{value}")
+        for v in value.items():
+            print(f" \n VALUE IS: \n{v}")
+    return """
 
 #Get args for our scan
 parser = argparse.ArgumentParser()
@@ -56,5 +78,5 @@ if args.iL != None:
 else:
     ipToScan = args.ip
 
-nmapScan(ipToScan, args.port)
-#scanResults = scanner.scan(args.ip, args.port)
+results = nmapScan(ipToScan, args.port)
+""" printResults(results) """
