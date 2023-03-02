@@ -22,18 +22,49 @@ def nmapScan(ip, port):
             scanResult = scanner.scan(i, port)
             f = open("TestNmapFile.txt", "a")
             f.write(str(scanResult))
-            for host in scanner.all_hosts():
-                print('----------------------')
-                print(f'Host: {host} {scanner[host].hostname()}')
-                print(f'State: {scanner[host].state()}')
-                for protocol in scanner[host].all_protocols():
-                    print('----------------------')
-                    print(f'Protocol: {protocol}')
+            # HOLY SHIT this is terrible. Need to make it better but I can't figure out how to 
+            # access the dictionary because the library names it nmap which is a keyword for lib.
+            print(type(scanResult))
+            print(scanResult)
+            for k, v in scanResult.items():
+                if k == 'scan':
+                    for scankey, scanvalue in scanResult[k].items():
+                        print("---------")
+                        print(f"Host: {scankey}")
+                        print("---------")
+                        print(str(scankey))
+                        print(str(scanvalue))
+                        for hostkey, hostvalue in scanResult[k][scankey].items():
+                            print(hostkey)
+                            print(hostvalue)
+                            if hostkey == 'tcp':
+                                for portKey, portValue in scanResult[k][scankey][hostkey].items():
+                                    print(portKey)
+                                    print(portValue)
+                            elif hostkey =='hostnames':
+                                for portKey, portValue in scanResult[k][scankey][hostkey]:
+                                    #This portion of the dictionary randomly has it's values nested in a list
+                                    for test in scanResult[k][scankey][hostkey]:
+                                        print(type(test))
+                                        for hKey, hValue in test.items():
+                                            if hKey == 'name':
+                                                print(f"Hostname: {hValue}")
+                                        
+                                        
+                                    
+                    
+
+
+            # for host in scanner.all_hosts():
+            #     print('----------------------')
+            #     print(f'Host: {host} {scanner[host].hostname()}')
+            #     print(f'State: {scanner[host].state()}')
+            #     for protocol in scanner[host].all_protocols():
+            #         print('----------------------')
+            #         print(f'Protocol: {protocol}')
+            #         print(f'Type: {scanner[]}')
                     #Can't quite figure out how to loop through this correctly. Need to read more about accessing contents of dicts.
-                    """ localPort = scanner[host][protocol].keys()    
-                    #localPort.sort()
-                    for port in localPort():
-                        print(f'port: {port} {scanner[host][protocol][port][state']}') """
+                   
     else:
         scanResult = scanner.scan(ip, port)
         f = open("TestNmapFile.txt", "a")
