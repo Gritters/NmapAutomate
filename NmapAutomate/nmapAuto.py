@@ -44,9 +44,9 @@ def nmapScan(ip, port):
                             elif hostkey =='hostnames':
                                 for portKey, portValue in scanResult[k][scankey][hostkey]:
                                     #This portion of the dictionary randomly has it's values nested in a list
-                                    for test in scanResult[k][scankey][hostkey]:
-                                        print(type(test))
-                                        for hKey, hValue in test.items():
+                                    for listDict in scanResult[k][scankey][hostkey]:
+                                        print(type(listDict))
+                                        for hKey, hValue in listDict.items():
                                             if hKey == 'name':
                                                 print(f"Hostname: {hValue}")
                                         
