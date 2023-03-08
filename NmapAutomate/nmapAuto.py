@@ -10,6 +10,7 @@ import nmap
 # Custom NMAP scan to match external engagements
 # Add dorky header when ran
 #Output scan results to terminal in clean format
+#Need to fix single IP vs List not printing correctly. Don't just paste the printing loops
 
 #MUST HAVE NMAP INSTALLED AND ON YOUR PATH
 #Needed packages python-nmap, argparse
@@ -24,47 +25,40 @@ def nmapScan(ip, port):
             f.write(str(scanResult))
             # HOLY SHIT this is terrible. Need to make it better but I can't figure out how to 
             # access the dictionary because the library names it nmap which is a keyword for lib.
-            print(type(scanResult))
-            print(scanResult)
+            #print(type(scanResult))
+            #print(scanResult)
             for k, v in scanResult.items():
                 if k == 'scan':
                     for scankey, scanvalue in scanResult[k].items():
                         print("---------")
                         print(f"Host: {scankey}")
                         print("---------")
-                        print(str(scankey))
-                        print(str(scanvalue))
+                        #print(str(scankey))
+                        #print(str(scanvalue))
                         for hostkey, hostvalue in scanResult[k][scankey].items():
-                            print(hostkey)
-                            print(hostvalue)
+                            #print(hostkey)
+                            #print(hostvalue)
                             if hostkey == 'tcp':
                                 for portKey, portValue in scanResult[k][scankey][hostkey].items():
-                                    print(portKey)
-                                    print(portValue)
+                                    #Print the Port num and what service is running here
+                                    print(f"Ports")
+                                    print("---------")
+                                    print(f"{portKey} is {scanResult[k][scankey][hostkey][portKey].get('state')} and is running the protocol {scanResult[k][scankey][hostkey][portKey].get('name')}")
+                                    print(f"The service running on {portKey} is {scanResult[k][scankey][hostkey][portKey].get('product')} {scanResult[k][scankey][hostkey][portKey].get('version')}")
+                                    
                             elif hostkey =='hostnames':
                                 for portKey, portValue in scanResult[k][scankey][hostkey]:
                                     #This portion of the dictionary randomly has it's values nested in a list
                                     for listDict in scanResult[k][scankey][hostkey]:
-                                        print(type(listDict))
                                         for hKey, hValue in listDict.items():
                                             if hKey == 'name':
                                                 print(f"Hostname: {hValue}")
-                                        
-                                        
-                                    
-                    
-
-
-            # for host in scanner.all_hosts():
-            #     print('----------------------')
-            #     print(f'Host: {host} {scanner[host].hostname()}')
-            #     print(f'State: {scanner[host].state()}')
-            #     for protocol in scanner[host].all_protocols():
-            #         print('----------------------')
-            #         print(f'Protocol: {protocol}')
-            #         print(f'Type: {scanner[]}')
-                    #Can't quite figure out how to loop through this correctly. Need to read more about accessing contents of dicts.
-                   
+                            # Have an elif for Addresses key and then add IP?
+                            # Have status elif and print the state
+                            elif hostkey == 'status':
+                                print("---------")
+                                print(f"Host is {scanResult[k][scankey][hostkey].get('state')}")
+                                print("---------")          
     else:
         scanResult = scanner.scan(ip, port)
         f = open("TestNmapFile.txt", "a")
