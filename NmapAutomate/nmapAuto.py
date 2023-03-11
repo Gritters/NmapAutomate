@@ -6,45 +6,69 @@ import nmap
 #Going to start with a single IP and eventually have it read from a list of IPs
 
 # TO DO
-# Read from file - DONE. I think I've done this really shittly and need to figure out how to logic the var type better but it works.
-# Custom NMAP scan to match external engagements
-# Add dorky header when ran
-#Output scan results to terminal in clean format
-#Need to fix single IP vs List not printing correctly. Don't just paste the printing loops
+# I want to figure out how to print out the help if there are no arguments provided rather than an error.
 
 #MUST HAVE NMAP INSTALLED AND ON YOUR PATH
 #Needed packages python-nmap, argparse
 #pip install python-nmap argparse
 
 def nmapScan(ip, port):
-    #NMAP SCAN HERE
-    if type(ip) is list:
-        for i in ip:
-            scanResult = scanner.scan(i, port)
+    if port == 'all':
+        #Loop through all ports for IP
+        for x in range(65000):
+            #NMAP SCAN HERE
+            if type(ip) is list:
+                for i in ip:
+                    scanResult = scanner.scan(i, str(x))
+                    f = open("TestNmapFile.txt", "a")
+                    f.write(str(scanResult))
+                    printToTerm(scanResult)
+                    
+            else:
+                scanResult = scanner.scan(ip, str(x))
+                f = open("TestNmapFile.txt", "a")
+                f.write(str(scanResult))
+                printToTerm(scanResult)   
+   #Single Port
+    else:
+        if type(ip) is list:
+                for i in ip:
+                    scanResult = scanner.scan(i, port)
+                    f = open("TestNmapFile.txt", "a")
+                    f.write(str(scanResult))
+                    printToTerm(scanResult)
+                    
+        else:
+            scanResult = scanner.scan(ip, port)
             f = open("TestNmapFile.txt", "a")
             f.write(str(scanResult))
-            # HOLY SHIT this is terrible. Need to make it better but I can't figure out how to 
-            # access the dictionary because the library names it nmap which is a keyword for lib.
-            #print(type(scanResult))
-            #print(scanResult)
-            for k, v in scanResult.items():
+            printToTerm(scanResult)       
+    return scanResult
+
+def getIP(ipAddressFile):
+    #Get IP as a single IP or out of list
+    file = open(ipAddressFile, 'r')
+    ipList = file.read().split('\n')
+    return ipList
+
+def printToTerm(scanResult):
+    # HOLY SHIT this is terrible. Need to make it better but I can't figure out how to 
+    # access the dictionary because the library names it nmap which is a keyword for lib.
+    for k, v in scanResult.items():
                 if k == 'scan':
                     for scankey, scanvalue in scanResult[k].items():
                         print("---------")
                         print(f"Host: {scankey}")
                         print("---------")
-                        #print(str(scankey))
-                        #print(str(scanvalue))
                         for hostkey, hostvalue in scanResult[k][scankey].items():
-                            #print(hostkey)
-                            #print(hostvalue)
                             if hostkey == 'tcp':
                                 for portKey, portValue in scanResult[k][scankey][hostkey].items():
                                     #Print the Port num and what service is running here
-                                    print(f"Ports")
+                                    print(f"Port")
                                     print("---------")
-                                    print(f"{portKey} is {scanResult[k][scankey][hostkey][portKey].get('state')} and is running the protocol {scanResult[k][scankey][hostkey][portKey].get('name')}")
-                                    print(f"The service running on {portKey} is {scanResult[k][scankey][hostkey][portKey].get('product')} {scanResult[k][scankey][hostkey][portKey].get('version')}")
+                                    print(f"{portKey} : {scanResult[k][scankey][hostkey][portKey].get('state')} - protocol : {scanResult[k][scankey][hostkey][portKey].get('name')}")
+                                    print(f"Service : {scanResult[k][scankey][hostkey][portKey].get('product')} - Version : {scanResult[k][scankey][hostkey][portKey].get('version')}")
+                                    print("---------")
                                     
                             elif hostkey =='hostnames':
                                 for portKey, portValue in scanResult[k][scankey][hostkey]:
@@ -59,31 +83,16 @@ def nmapScan(ip, port):
                                 print("---------")
                                 print(f"Host is {scanResult[k][scankey][hostkey].get('state')}")
                                 print("---------")          
-    else:
-        scanResult = scanner.scan(ip, port)
-        f = open("TestNmapFile.txt", "a")
-        f.write(str(scanResult))
-    
-    print("Scan completed. Check file for scan results")
-    return scanResult
-
-def getIP(ipAddressFile):
-    #Get IP as a single IP or out of list
-    file = open(ipAddressFile, 'r')
-    ipList = file.read().split('\n')
-    print(str(ipList))
-    return ipList
-
-""" def printResults(scan):
-    #DO THE PRINTING HERE
-    print(str(scan.all_hosts()))
-    for key, value in scan.items():
-        #Print Scan Information
-        print(f" \n VALUE IS: \n{value}")
-        for v in value.items():
-            print(f" \n VALUE IS: \n{v}")
-    return """
-
+    return
+banner = """
+   _____          __            _______      _____      _____ _____ ____
+  /  _  \  __ ___/  |_  ____    \      \    /     \    /  _  \\______    \\
+ /  /_\  \|  |  \   __\/  _ \   /   |   \  /  \ /  \  /  /_\  \|     ___/
+/    |    \  |  /|  | (  <_> ) /    |    \/    Y    \/    |    \    |    
+\____|__  /____/ |__|  \____/  \____|__  /\____|__  /\____|__  /____|    
+        \/                             \/         \/         \/          
+      """
+print(banner)
 #Get args for our scan
 parser = argparse.ArgumentParser()
 
@@ -91,6 +100,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--ip', type=str, required=False, help='The IP Address you would like to scan with NMAP')
 parser.add_argument('--port', type=str, required=False, help='The Port you would like to scan for the IP you have provided')
 parser.add_argument('--iL', type=str, required=False, help='The name of the txt file containing a list of IP addresses')
+parser.add_argument('--Pl', type=str, required=False, help='Range or list of ports. EX - 80,443,8080')
+parser.add_argument('--all', type=str, default='all', required=False, nargs='?', help="Scan ALL ports")
+
 #Parse args
 args = parser.parse_args()
 
@@ -103,5 +115,10 @@ if args.iL != None:
 else:
     ipToScan = args.ip
 
-results = nmapScan(ipToScan, args.port)
-""" printResults(results) """
+if args.Pl != None:
+    results = nmapScan(ipToScan, args.Pl)
+elif args.port !=None:
+    results = nmapScan(ipToScan, str(args.port))
+else:
+    results = nmapScan(ipToScan, args.all)
+print("Scan completed.")
